@@ -279,3 +279,5 @@
 /Users/mondaypaiva/RiderProjects/oop-s2-3-mvc-75523/VgcCollege.Web/obj/Debug/net10.0/VgcCollege.Web.pdb
 /Users/mondaypaiva/RiderProjects/oop-s2-3-mvc-75523/VgcCollege.Web/obj/Debug/net10.0/VgcCollege.Web.genruntimeconfig.cache
 /Users/mondaypaiva/RiderProjects/oop-s2-3-mvc-75523/VgcCollege.Web/obj/Debug/net10.0/ref/VgcCollege.Web.dll
+/Users/mondaypaiva/RiderProjects/oop-s2-3-mvc-75523/VgcCollege.Web/bin/Debug/net10.0/Bogus.dll
+/Users/mondaypaiva/RiderProjects/oop-s2-3-mvc-75523/VgcCollege.Web/obj/Debug/net10.0/VgcCollege.Web.sourcelink.json
