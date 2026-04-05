@@ -1,0 +1,21 @@
+@model VgcCollege.Web.Models.AssignmentResult
+
+@{
+    ViewData["Title"] = "Assignment Result Details";
+}
+
+<h1>Assignment Result Details</h1>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <p><strong>Assignment:</strong> @(Model.Assignment?.Title ?? "-")</p>
+        <p><strong>Student:</strong> @(Model.StudentProfile?.Name ?? "-")</p>
+        <p><strong>Score:</strong> @Model.Score</p>
+        <p><strong>Feedback:</strong> @Model.Feedback</p>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</div>

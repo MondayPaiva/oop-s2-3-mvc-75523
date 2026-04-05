@@ -20,9 +20,9 @@ namespace VgcCollege.Web.Controllers
         public async Task<IActionResult> Index()
         {
             var applicationDbContext = _context.AttendanceRecords
-                .Include(a => a.CourseEnrolment)
+                .Include(a => a.CourseEnrolment!)
                     .ThenInclude(e => e.StudentProfile!)
-                .Include(a => a.CourseEnrolment)
+                .Include(a => a.CourseEnrolment!)
                     .ThenInclude(e => e.Course!);
 
             return View(await applicationDbContext.ToListAsync());
@@ -33,9 +33,9 @@ namespace VgcCollege.Web.Controllers
             if (id == null) return NotFound();
 
             var attendanceRecord = await _context.AttendanceRecords
-                .Include(a => a.CourseEnrolment)
+                .Include(a => a.CourseEnrolment!)
                     .ThenInclude(e => e.StudentProfile!)
-                .Include(a => a.CourseEnrolment)
+                .Include(a => a.CourseEnrolment!)
                     .ThenInclude(e => e.Course!)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
@@ -160,9 +160,9 @@ namespace VgcCollege.Web.Controllers
             if (id == null) return NotFound();
 
             var attendanceRecord = await _context.AttendanceRecords
-                .Include(a => a.CourseEnrolment)
+                .Include(a => a.CourseEnrolment!)
                     .ThenInclude(e => e.StudentProfile!)
-                .Include(a => a.CourseEnrolment)
+                .Include(a => a.CourseEnrolment!)
                     .ThenInclude(e => e.Course!)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
