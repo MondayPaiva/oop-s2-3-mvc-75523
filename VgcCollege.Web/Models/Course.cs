@@ -12,6 +12,8 @@ namespace VgcCollege.Web.Models
         [Required]
         public int BranchId { get; set; }
 
+        public int? FacultyProfileId { get; set; }
+
         [DataType(DataType.Date)]
         public DateTime StartDate { get; set; }
 
@@ -19,6 +21,7 @@ namespace VgcCollege.Web.Models
         public DateTime EndDate { get; set; }
 
         public Branch? Branch { get; set; }
+        public FacultyProfile? FacultyProfile { get; set; }
 
         public ICollection<CourseEnrolment> Enrolments { get; set; } = new List<CourseEnrolment>();
         public ICollection<Assignment> Assignments { get; set; } = new List<Assignment>();

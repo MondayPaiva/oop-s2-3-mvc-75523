@@ -1,4 +1,3 @@
-using Bogus;
 using Microsoft.AspNetCore.Identity;
 using VgcCollege.Web.Models;
 
@@ -39,16 +38,6 @@ namespace VgcCollege.Web.Data
             context.Branches.AddRange(branches);
             await context.SaveChangesAsync();
 
-            var courses = new List<Course>
-            {
-                new() { Name = "Computing Fundamentals", BranchId = branches[0].Id, StartDate = DateTime.Today.AddDays(-30), EndDate = DateTime.Today.AddMonths(6) },
-                new() { Name = "Business Studies", BranchId = branches[1].Id, StartDate = DateTime.Today.AddDays(-20), EndDate = DateTime.Today.AddMonths(6) },
-                new() { Name = "Digital Marketing", BranchId = branches[2].Id, StartDate = DateTime.Today.AddDays(-10), EndDate = DateTime.Today.AddMonths(6) }
-            };
-
-            context.Courses.AddRange(courses);
-            await context.SaveChangesAsync();
-
             var facultyProfile = new FacultyProfile
             {
                 IdentityUserId = facultyUser.Id,
@@ -58,6 +47,38 @@ namespace VgcCollege.Web.Data
             };
 
             context.FacultyProfiles.Add(facultyProfile);
+            await context.SaveChangesAsync();
+
+            var courses = new List<Course>
+            {
+                new()
+                {
+                    Name = "Computing Fundamentals",
+                    BranchId = branches[0].Id,
+                    FacultyProfileId = facultyProfile.Id,
+                    StartDate = DateTime.Today.AddDays(-30),
+                    EndDate = DateTime.Today.AddMonths(6)
+                },
+                new()
+                {
+                    Name = "Business Studies",
+                    BranchId = branches[1].Id,
+                    FacultyProfileId = facultyProfile.Id,
+                    StartDate = DateTime.Today.AddDays(-20),
+                    EndDate = DateTime.Today.AddMonths(6)
+                },
+                new()
+                {
+                    Name = "Digital Marketing",
+                    BranchId = branches[2].Id,
+                    FacultyProfileId = facultyProfile.Id,
+                    StartDate = DateTime.Today.AddDays(-10),
+                    EndDate = DateTime.Today.AddMonths(6)
+                }
+            };
+
+            context.Courses.AddRange(courses);
+            await context.SaveChangesAsync();
 
             var student1 = new StudentProfile
             {
@@ -112,6 +133,7 @@ namespace VgcCollege.Web.Data
             };
 
             context.AttendanceRecords.AddRange(attendance);
+            await context.SaveChangesAsync();
 
             var assignment = new Assignment
             {
@@ -131,6 +153,7 @@ namespace VgcCollege.Web.Data
             };
 
             context.AssignmentResults.AddRange(assignmentResults);
+            await context.SaveChangesAsync();
 
             var exam = new Exam
             {
@@ -151,7 +174,6 @@ namespace VgcCollege.Web.Data
             };
 
             context.ExamResults.AddRange(examResults);
-
             await context.SaveChangesAsync();
         }
 

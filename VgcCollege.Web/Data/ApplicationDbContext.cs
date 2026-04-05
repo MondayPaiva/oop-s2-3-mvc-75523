@@ -28,6 +28,12 @@ namespace VgcCollege.Web.Data
                 .HasForeignKey(c => c.BranchId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            builder.Entity<Course>()
+                .HasOne(c => c.FacultyProfile)
+                .WithMany(f => f.Courses)
+                .HasForeignKey(c => c.FacultyProfileId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             builder.Entity<CourseEnrolment>()
                 .HasOne(e => e.StudentProfile)
                 .WithMany(s => s.Enrolments)
