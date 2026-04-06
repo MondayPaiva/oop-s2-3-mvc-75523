@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -7,7 +8,7 @@ using VgcCollege.Web.Models;
 
 namespace VgcCollege.Web.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Student")]
     public class CourseEnrolmentsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -19,11 +20,23 @@ namespace VgcCollege.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.CourseEnrolments
-                .Include(c => c.Course)
-                .Include(c => c.StudentProfile);
+            if (User.IsInRole("Admin"))
+            {
+                var applicationDbContext = _context.CourseEnrolments
+                    .Include(c => c.Course)
+                    .Include(c => c.StudentProfile);
 
-            return View(await applicationDbContext.ToListAsync());
+                return View(await applicationDbContext.ToListAsync());
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var myEnrolments = _context.CourseEnrolments
+                .Include(c => c.Course)
+                .Include(c => c.StudentProfile)
+                .Where(c => c.StudentProfile != null && c.StudentProfile.IdentityUserId == userId);
+
+            return View(await myEnrolments.ToListAsync());
         }
 
         public async Task<IActionResult> Details(int? id)
@@ -38,9 +51,20 @@ namespace VgcCollege.Web.Controllers
 
             if (courseEnrolment == null) return NotFound();
 
+            if (User.IsInRole("Student"))
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (courseEnrolment.StudentProfile?.IdentityUserId != userId)
+                {
+                    return Forbid();
+                }
+            }
+
             return View(courseEnrolment);
         }
 
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             ViewData["CourseId"] = new SelectList(_context.Courses, "Id", "Name");
@@ -50,6 +74,7 @@ namespace VgcCollege.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([Bind("Id,StudentProfileId,CourseId,EnrolDate,Status")] CourseEnrolment courseEnrolment)
         {
             var exists = await _context.CourseEnrolments.AnyAsync(e =>
@@ -73,6 +98,7 @@ namespace VgcCollege.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -87,6 +113,7 @@ namespace VgcCollege.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id, [Bind("Id,StudentProfileId,CourseId,EnrolDate,Status")] CourseEnrolment courseEnrolment)
         {
             if (id != courseEnrolment.Id) return NotFound();
@@ -124,6 +151,7 @@ namespace VgcCollege.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -140,6 +168,7 @@ namespace VgcCollege.Web.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var courseEnrolment = await _context.CourseEnrolments.FindAsync(id);
