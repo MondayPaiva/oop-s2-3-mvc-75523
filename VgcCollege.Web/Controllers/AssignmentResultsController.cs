@@ -8,7 +8,7 @@ using VgcCollege.Web.Models;
 
 namespace VgcCollege.Web.Controllers
 {
-    [Authorize(Roles = "Admin,Student")]
+    [Authorize(Roles = "Admin,Faculty,Student")]
     public class AssignmentResultsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -24,17 +24,36 @@ namespace VgcCollege.Web.Controllers
             {
                 var applicationDbContext = _context.AssignmentResults
                     .Include(a => a.Assignment)
+                        .ThenInclude(a => a.Course)
                     .Include(a => a.StudentProfile);
 
                 return View(await applicationDbContext.ToListAsync());
             }
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (User.IsInRole("Faculty"))
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                var facultyResults = _context.AssignmentResults
+                    .Include(a => a.Assignment)
+                        .ThenInclude(a => a.Course)
+                            .ThenInclude(c => c.FacultyProfile)
+                    .Include(a => a.StudentProfile)
+                    .Where(a => a.Assignment != null &&
+                                a.Assignment.Course != null &&
+                                a.Assignment.Course.FacultyProfile != null &&
+                                a.Assignment.Course.FacultyProfile.IdentityUserId == userId);
+
+                return View(await facultyResults.ToListAsync());
+            }
+
+            var studentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             var myResults = _context.AssignmentResults
                 .Include(a => a.Assignment)
+                    .ThenInclude(a => a.Course)
                 .Include(a => a.StudentProfile)
-                .Where(a => a.StudentProfile != null && a.StudentProfile.IdentityUserId == userId);
+                .Where(a => a.StudentProfile != null && a.StudentProfile.IdentityUserId == studentUserId);
 
             return View(await myResults.ToListAsync());
         }
@@ -45,6 +64,8 @@ namespace VgcCollege.Web.Controllers
 
             var assignmentResult = await _context.AssignmentResults
                 .Include(a => a.Assignment)
+                    .ThenInclude(a => a.Course)
+                        .ThenInclude(c => c.FacultyProfile)
                 .Include(a => a.StudentProfile)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
@@ -55,6 +76,16 @@ namespace VgcCollege.Web.Controllers
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 if (assignmentResult.StudentProfile?.IdentityUserId != userId)
+                {
+                    return Forbid();
+                }
+            }
+
+            if (User.IsInRole("Faculty"))
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (assignmentResult.Assignment?.Course?.FacultyProfile?.IdentityUserId != userId)
                 {
                     return Forbid();
                 }

@@ -8,7 +8,7 @@ using VgcCollege.Web.Models;
 
 namespace VgcCollege.Web.Controllers
 {
-    [Authorize(Roles = "Admin,Student")]
+    [Authorize(Roles = "Admin,Faculty,Student")]
     public class ExamResultsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -24,19 +24,38 @@ namespace VgcCollege.Web.Controllers
             {
                 var applicationDbContext = _context.ExamResults
                     .Include(e => e.Exam)
+                        .ThenInclude(e => e.Course)
                     .Include(e => e.StudentProfile);
 
                 return View(await applicationDbContext.ToListAsync());
             }
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (User.IsInRole("Faculty"))
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                var facultyResults = _context.ExamResults
+                    .Include(e => e.Exam)
+                        .ThenInclude(e => e.Course)
+                            .ThenInclude(c => c.FacultyProfile)
+                    .Include(e => e.StudentProfile)
+                    .Where(e => e.Exam != null &&
+                                e.Exam.Course != null &&
+                                e.Exam.Course.FacultyProfile != null &&
+                                e.Exam.Course.FacultyProfile.IdentityUserId == userId);
+
+                return View(await facultyResults.ToListAsync());
+            }
+
+            var studentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             var myResults = _context.ExamResults
                 .Include(e => e.Exam)
+                    .ThenInclude(e => e.Course)
                 .Include(e => e.StudentProfile)
                 .Where(e =>
                     e.StudentProfile != null &&
-                    e.StudentProfile.IdentityUserId == userId &&
+                    e.StudentProfile.IdentityUserId == studentUserId &&
                     e.Exam != null &&
                     e.Exam.ResultsReleased);
 
@@ -49,6 +68,8 @@ namespace VgcCollege.Web.Controllers
 
             var examResult = await _context.ExamResults
                 .Include(e => e.Exam)
+                    .ThenInclude(e => e.Course)
+                        .ThenInclude(c => c.FacultyProfile)
                 .Include(e => e.StudentProfile)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
@@ -64,6 +85,16 @@ namespace VgcCollege.Web.Controllers
                 }
 
                 if (examResult.Exam == null || !examResult.Exam.ResultsReleased)
+                {
+                    return Forbid();
+                }
+            }
+
+            if (User.IsInRole("Faculty"))
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (examResult.Exam?.Course?.FacultyProfile?.IdentityUserId != userId)
                 {
                     return Forbid();
                 }
