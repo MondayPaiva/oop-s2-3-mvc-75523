@@ -34,7 +34,11 @@ namespace VgcCollege.Web.Controllers
             var myResults = _context.ExamResults
                 .Include(e => e.Exam)
                 .Include(e => e.StudentProfile)
-                .Where(e => e.StudentProfile != null && e.StudentProfile.IdentityUserId == userId);
+                .Where(e =>
+                    e.StudentProfile != null &&
+                    e.StudentProfile.IdentityUserId == userId &&
+                    e.Exam != null &&
+                    e.Exam.ResultsReleased);
 
             return View(await myResults.ToListAsync());
         }
@@ -55,6 +59,11 @@ namespace VgcCollege.Web.Controllers
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 if (examResult.StudentProfile?.IdentityUserId != userId)
+                {
+                    return Forbid();
+                }
+
+                if (examResult.Exam == null || !examResult.Exam.ResultsReleased)
                 {
                     return Forbid();
                 }
