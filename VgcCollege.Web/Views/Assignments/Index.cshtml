@@ -6,9 +6,12 @@
 
 <h1>Assignments</h1>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Create New Assignment</a>
-</p>
+@if (User.IsInRole("Admin"))
+{
+    <p>
+        <a asp-action="Create" class="btn btn-primary">Create New Assignment</a>
+    </p>
+}
 
 <table class="table table-bordered table-striped">
     <thead>
@@ -30,8 +33,12 @@
             <td>@item.DueDate.ToShortDateString()</td>
             <td>
                 <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Details</a>
-                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edit</a>
-                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Delete</a>
+
+                @if (User.IsInRole("Admin"))
+                {
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Delete</a>
+                }
             </td>
         </tr>
     }
